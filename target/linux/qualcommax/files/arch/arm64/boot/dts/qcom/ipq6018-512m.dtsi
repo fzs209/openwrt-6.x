@@ -1,11 +1,7 @@
-// SPDX-License-Identifier: GPL-2.0-only
-
+~// SPDX-License-Identifier: GPL-2.0-only
+~
 #include "ipq6018.dtsi"
 
 &q6_region {
-    status = "disabled";
-};
-
-&q6_etr_region {
-    status = "disabled";
+	reg = <0x0 0x4ab00000 0x0 0x1000000>;
 };
