@@ -16,7 +16,7 @@ DEFAULT_PACKAGES += \
 	kmod-phy-qca83xx \
 	kmod-gpio-button-hotplug kmod-leds-gpio \
 	kmod-qca-nss-dp kmod-qca-nss-ecm \
-	kmod-qca-ssdk qca-ssdk-shell kmod-qca-nss-drv \
+	kmod-qca-ssdk kmod-qca-nss-drv \
 	kmod-qca-nss-drv-pppoe kmod-qca-nss-drv-bridge-mgr
 
 $(eval $(call BuildTarget))
