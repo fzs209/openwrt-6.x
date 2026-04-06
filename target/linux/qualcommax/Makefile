@@ -12,9 +12,10 @@ KERNEL_PATCHVER:=6.12
 
 include $(INCLUDE_DIR)/target.mk
 DEFAULT_PACKAGES += \
-	autocore cpufreq luci uboot-envtools \
-	kmod-phy-qca83xx \
-	kmod-gpio-button-hotplug kmod-leds-gpio \
+	autocore automount cpufreq e2fsprogs f2fs-tools losetup luci uboot-envtools wpad-openssl \
+	kmod-ath11k kmod-ath11k-ahb kmod-ath11k-pci kmod-dsa kmod-dsa-qca8k kmod-phy-aquantia kmod-phy-qca83xx \
+	kmod-fs-ext4 kmod-fs-f2fs kmod-gpio-button-hotplug kmod-leds-gpio kmod-leds-pwm \
+	kmod-usb3 kmod-usb-dwc3 kmod-usb-dwc3-qcom kmod-qca-nss-dp kmod-nss-ifb \
 	kmod-qca-nss-drv kmod-qca-nss-ecm \
 	kmod-qca-nss-drv-bridge-mgr \
 	kmod-qca-nss-drv-eogremgr \
@@ -32,6 +33,7 @@ DEFAULT_PACKAGES += \
 	kmod-qca-nss-drv-tun6rd \
 	kmod-qca-nss-drv-tunipip6 \
 	kmod-qca-nss-drv-vlan-mgr \
-	kmod-qca-nss-drv-vxlanmgr
+	kmod-qca-nss-drv-vxlanmgr \
+	kmod-qca-nss-drv-wifi-meshmgr
 
 $(eval $(call BuildTarget))
