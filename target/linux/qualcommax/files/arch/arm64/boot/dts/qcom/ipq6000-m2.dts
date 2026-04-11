@@ -70,11 +70,6 @@
     };
 };
 
-// 3. 通过绝对路径删除 wcss-smp2p 节点 (避免标签依赖)
-/ {
-    /delete-node/ wcss-smp2p;
-};
-
 // 5. 通过绝对路径删除 Q6 ETR 和 M3 转储保留内存
 / {
     reserved-memory {
