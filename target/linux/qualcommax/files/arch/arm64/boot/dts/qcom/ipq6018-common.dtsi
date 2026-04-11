@@ -80,23 +80,23 @@
 };
 
 &qusb_phy_0 {
-	status = "okay";
+	status = "disabled";
 };
 
 &qusb_phy_1 {
-	status = "okay";
+	status = "disabled";
 };
 
 &ssphy_0 {
-	status = "okay";
+	status = "disabled";
 };
 
 &usb2 {
-	status = "okay";
+	status = "disabled";
 };
 
 &usb3 {
-	status = "okay";
+	status = "disabled";
 };
 
 &cpu_opp_table {
