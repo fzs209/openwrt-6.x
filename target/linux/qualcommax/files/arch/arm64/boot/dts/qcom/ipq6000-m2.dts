@@ -49,3 +49,37 @@
 		};
 	};
 };
+
+// ================== 彻底禁用 Wi-Fi 和 Q6 DSP ==================
+
+// 1. 禁用无线设备
+&wifi {
+    status = "disabled";
+};
+
+// 2. 禁用 Q6 远程处理器（视实际标签名，二选一）
+&q6v5_wcss {
+    status = "disabled";
+};
+
+// 如果上面不生效，则尝试禁用 remoteproc 节点（但通常 q6v5_wcss 是顶层标签）
+// &remoteproc {
+//     status = "disabled";
+// };
+
+// 3. 禁用 Wi-Fi SMP2P 通信
+&wcss_smp2p {
+    status = "disabled";
+};
+
+// 4. 将 Q6 固件内存区大小设为 0，防止驱动分配
+&q6_region {
+    reg = <0x0 0x4ab00000 0x0 0x0>;
+    status = "disabled";
+};
+
+// 5. 删除 Q6 ETR 和 M3 转储保留内存（释放约 2 MiB）
+&reserved_memory {
+    /delete-node/ q6_etr_dump@50b00000;
+    /delete-node/ m3_dump@50c00000;
+};
