@@ -188,7 +188,7 @@ _procd_add_jail() {
 	json_add_string name "$1"
 
 	shift
-
+	
 	for a in $@; do
 		case $a in
 		log)	json_add_boolean "log" "1";;
@@ -335,7 +335,9 @@ _procd_add_reload_data_trigger() {
 	local name=$(basename ${script:-$initscript})
 
 	_procd_open_trigger
-	_procd_add_data_trigger $1 /etc/init.d/$name reload
+	for t in "$@"; do
+		_procd_add_data_trigger "$t" /etc/init.d/$name reload
+	done
 	_procd_close_trigger
 }
 

@@ -64,6 +64,26 @@ config KERNEL_RISCV_PMU_SBI
 	bool
 	depends on riscv64
 
+config KERNEL_NR_CPUS
+	int "Maximum number of CPUs (2-512)" if TARGET_x86
+	range 2 512 if TARGET_x86
+	default 512 if TARGET_x86_64
+	default 8 if TARGET_x86
+	help
+	  Maximum number of CPUs supported by the kernel.
+	  Each CPU allocates approximately 100-200KB of RAM for
+	  per-CPU data structures.
+
+	  Sample values:
+	    4   - Ultra-low-level desktops e.g. Intel N150
+	    8   - Low-level desktops e.g. Intel N305
+	    16  - Mid-level dekstops e.g. AMD Ryzen 7
+	    32  - High-level desktops e.g. AMD Ryzen 9/Intel Core i9
+	    384 - High-level server e.g. AMD EPYC 9965
+
+	  Lower values reduce memory usage. Set to match your hardware
+	  for optimal memory efficiency.
+
 config KERNEL_X86_VSYSCALL_EMULATION
 	bool "Enable vsyscall emulation"
 	depends on x86_64
@@ -591,6 +611,7 @@ config KERNEL_FRAME_WARN
 # kernel configurations and lead to devices that dont have working console
 config KERNEL_DEBUG_LL
 	bool
+	default n
 	depends on arm
 	help
 	  ARM low level debugging.
@@ -657,6 +678,7 @@ config KERNEL_PROBE_EVENTS_BTF_ARGS
 config KERNEL_BPF_KPROBE_OVERRIDE
 	bool
 	depends on KERNEL_KPROBES
+	default n
 
 config KERNEL_BPF_STREAM_PARSER
 	bool "Allow a TCP stream parser to be used with BPF_MAP_TYPE_SOCKMAP"
@@ -1027,6 +1049,7 @@ if KERNEL_CGROUPS
 	
 	config KERNEL_MEMCG_V1
 		bool "Legacy cgroup v1 memory controller"
+		default n
 		depends on KERNEL_MEMCG
 		help
 		  Legacy cgroup v1 memory controller which has been deprecated by

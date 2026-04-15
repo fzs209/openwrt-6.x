@@ -1,3 +1,4 @@
+DTS_DIR := $(DTS_DIR)/qcom
 DEVICE_VARS += TPLINK_SUPPORT_STRING
 
 define Build/wax610-netgear-tar
@@ -6,8 +7,19 @@ define Build/wax610-netgear-tar
 	md5sum $@.tmp/nand-ipq6018-apps.img | cut -c 1-32 > $@.tmp/nand-ipq6018-apps.md5sum
 	echo "WAX610" > $@.tmp/metadata.txt
 	echo "WAX610-610Y_V99.9.9.9" > $@.tmp/version
-	tar -C $@.tmp/ -cf $@ .
+ 	tar -C $@.tmp/ -cf $@ .
 	rm -rf $@.tmp
+endef
+
+define Build/netgear-rbx350-qsdk-ipq-factory
+	$(CP) $(FLASH_SCRIPT) $(KDIR_TMP)/
+
+	echo "VERSION : V5.0.0.0_$(LINUX_VERSION)" > $@.metadata
+	echo "MODEL_ID : $(DEVICE_MODEL)" >> $@.metadata
+
+	$(TOPDIR)/scripts/mkits-qsdk-ipq-image.sh $@.its $(FLASH_SCRIPT) txt $@.metadata ubi $@
+	PATH=$(LINUX_DIR)/scripts/dtc:$(PATH) mkimage -f $@.its $@.new
+	@mv $@.new $@
 endef
 
 define Device/8devices_mango-dvk
@@ -31,7 +43,6 @@ define Device/alfa-network_ap120c-ax
 	BLOCKSIZE := 128k
 	PAGESIZE := 2048
 	SOC := ipq6000
-	DEVICE_DTS_CONFIG := config@cp03-c1
 	DEVICE_PACKAGES := ipq-wifi-alfa-network_ap120c-ax
 endef
 TARGET_DEVICES += alfa-network_ap120c-ax
@@ -43,39 +54,11 @@ define Device/cambiumnetworks_xe3-4
 	DEVICE_MODEL := XE3-4
 	BLOCKSIZE := 128k
 	PAGESIZE := 2048
-	SOC := ipq6010
 	DEVICE_DTS_CONFIG := config@cp01-c3-xv3-4
-	DEVICE_PACKAGES := ipq-wifi-cambiumnetworks_xe34 ath11k-firmware-qcn9074
+	SOC := ipq6010
+	DEVICE_PACKAGES := ipq-wifi-cambiumnetworks_xe34 ath11k-firmware-qcn9074 kmod-ath11k-pci
 endef
 TARGET_DEVICES += cambiumnetworks_xe3-4
-
-define Device/kt_ar06-012h
-	$(call Device/FitImage)
-	$(call Device/UbiFit)
-	DEVICE_VENDOR := KT
-	DEVICE_MODEL := AR06-012H
-	DEVICE_DTS := ipq6000-kt-ar06-012h
-	BLOCKSIZE := 128k
-	PAGESIZE := 2048
-	SOC := ipq6000
-	DEVICE_DTS_CONFIG := config@cp03-c1
-	DEVICE_PACKAGES := ipq-wifi-kt_ar06-012h
-endef
-TARGET_DEVICES += kt_ar06-012h
-
-define Device/lg_gapd-7500
-	$(call Device/FitImage)
-	$(call Device/UbiFit)
-	DEVICE_VENDOR := LG
-	DEVICE_MODEL := GAPD-7500
-  DEVICE_DTS := ipq6000-lg-gapd-7500
-	BLOCKSIZE := 128k
-	PAGESIZE := 2048
-	SOC := ipq6000
-	DEVICE_DTS_CONFIG := config@cp03-c1
-	DEVICE_PACKAGES := ipq-wifi-lg_gapd-7500 kmod-switch-rtl8367b
-endef
-TARGET_DEVICES += lg_gapd-7500
 
 define Device/glinet_gl-common
 	$(call Device/FitImage)
@@ -83,8 +66,8 @@ define Device/glinet_gl-common
 	DEVICE_VENDOR := GL.iNet
 	BLOCKSIZE := 128k
 	PAGESIZE := 2048
-	SOC := ipq6000
 	DEVICE_DTS_CONFIG := config@cp03-c1
+	SOC := ipq6000
 	IMAGES += factory.bin
 	IMAGE/factory.bin := append-ubi | append-gl-metadata
 endef
@@ -105,6 +88,25 @@ define Device/glinet_gl-axt1800
 endef
 TARGET_DEVICES += glinet_gl-axt1800
 
+define Device/link_nn6000-v1
+	$(call Device/FitImage)
+	$(call Device/EmmcImage)
+	DEVICE_VENDOR := Link
+	DEVICE_MODEL := NN6000 v1
+	SOC := ipq6000
+	KERNEL_SIZE := 6144k
+	DEVICE_DTS_CONFIG := config@cp03-c1
+	DEVICE_PACKAGES := ipq-wifi-link_nn6000 kmod-fs-f2fs f2fs-tools
+	IMAGE/factory.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-rootfs | append-metadata
+endef
+TARGET_DEVICES += link_nn6000-v1
+
+define Device/link_nn6000-v2
+	$(Device/link_nn6000-v1)
+	DEVICE_MODEL := NN6000 v2
+endef
+TARGET_DEVICES += link_nn6000-v2
+
 define Device/linksys_mr
 	$(call Device/FitImage)
 	DEVICE_VENDOR := Linksys
@@ -119,9 +121,9 @@ endef
 define Device/linksys_mr7350
 	$(call Device/linksys_mr)
 	DEVICE_MODEL := MR7350
-	SOC := ipq6000
 	NAND_SIZE := 256m
 	IMAGE_SIZE := 75776k
+	SOC := ipq6000
 	DEVICE_PACKAGES += ipq-wifi-linksys_mr7350 kmod-leds-pca963x
 endef
 TARGET_DEVICES += linksys_mr7350
@@ -129,12 +131,39 @@ TARGET_DEVICES += linksys_mr7350
 define Device/linksys_mr7500
 	$(call Device/linksys_mr)
 	DEVICE_MODEL := MR7500
-	SOC := ipq6010
+	SOC := ipq6018
 	NAND_SIZE := 512m
 	IMAGE_SIZE := 147456k
-	DEVICE_PACKAGES += ipq-wifi-linksys_mr7500 ath11k-firmware-qcn9074
+	DEVICE_PACKAGES += ipq-wifi-linksys_mr7500 \
+		ath11k-firmware-qcn9074 kmod-ath11k-pci \
+		kmod-leds-pwm kmod-phy-aquantia
 endef
 TARGET_DEVICES += linksys_mr7500
+
+define Device/netgear_rbx350
+	$(call Device/FitImage)
+	$(call Device/UbiFit)
+	SOC := ipq6018
+	DEVICE_VENDOR := Netgear
+	BLOCKSIZE := 128k
+	PAGESIZE := 2048
+	DEVICE_PACKAGES := ipq-wifi-netgear_rbk350
+	FLASH_SCRIPT := netgear_rbx350.bootscript
+	IMAGES += factory.img
+	IMAGE/factory.img := append-ubi | netgear-rbx350-qsdk-ipq-factory
+endef
+
+define Device/netgear_rbr350
+	$(call Device/netgear_rbx350)
+	DEVICE_MODEL := RBR350
+endef
+TARGET_DEVICES += netgear_rbr350
+
+define Device/netgear_rbs350
+	$(call Device/netgear_rbx350)
+	DEVICE_MODEL := RBS350
+endef
+TARGET_DEVICES += netgear_rbs350
 
 define Device/netgear_wax214
 	$(call Device/FitImage)
@@ -143,8 +172,8 @@ define Device/netgear_wax214
 	DEVICE_MODEL := WAX214
 	BLOCKSIZE := 128k
 	PAGESIZE := 2048
-	SOC := ipq6010
 	DEVICE_DTS_CONFIG := config@cp03-c1
+	SOC := ipq6010
 	DEVICE_PACKAGES := ipq-wifi-netgear_wax214
 endef
 TARGET_DEVICES += netgear_wax214
@@ -154,8 +183,8 @@ define Device/netgear_wax610-common
 	DEVICE_VENDOR := Netgear
 	BLOCKSIZE := 128k
 	PAGESIZE := 2048
-	SOC := ipq6010
 	DEVICE_DTS_CONFIG := config@cp03-c1
+	SOC := ipq6010
 	KERNEL_IN_UBI := 1
 	IMAGES += ui-factory.tar
 	IMAGE/ui-factory.tar := append-ubi | qsdk-ipq-factory-nand | pad-to 4096 | wax610-netgear-tar
@@ -188,61 +217,50 @@ define Device/qihoo_360v6
 endef
 TARGET_DEVICES += qihoo_360v6
 
-define Device/tplink_eap610od
+define Device/tplink_eap6xx-common
 	$(call Device/FitImage)
 	$(call Device/UbiFit)
 	DEVICE_VENDOR := TP-Link
-	DEVICE_MODEL := EAP610-Outdoor
 	BLOCKSIZE := 128k
 	PAGESIZE := 2048
-	SOC := ipq6010
-	DEVICE_DTS_CONFIG := config@cp03-c1
-	DEVICE_PACKAGES := ipq-wifi-tplink_eap610od
+	SOC := ipq6018
+	DEVICE_PACKAGES := kmod-phy-realtek
 	IMAGES += web-ui-factory.bin
 	IMAGE/web-ui-factory.bin := append-ubi | tplink-image-2022
+endef
+
+define Device/tplink_eap610-outdoor
+	$(call Device/tplink_eap6xx-common)
+	DEVICE_MODEL := EAP610-Outdoor
+	DEVICE_PACKAGES += ipq-wifi-tplink_eap610-outdoor
 	TPLINK_SUPPORT_STRING := SupportList:\r\n \
 		EAP610-Outdoor(TP-Link|UN|AX1800-D):1.0\r\n \
 		EAP610-Outdoor(TP-Link|JP|AX1800-D):1.0\r\n \
 		EAP610-Outdoor(TP-Link|CA|AX1800-D):1.0
 endef
-TARGET_DEVICES += tplink_eap610od
+TARGET_DEVICES += tplink_eap610-outdoor
 
-define Device/tplink_eap623od-hd-v1
-	$(call Device/FitImage)
-	$(call Device/UbiFit)
-	DEVICE_VENDOR := TP-Link
-	DEVICE_MODEL := EAP623-Outdoor HD v1
-	BLOCKSIZE := 128k
-	PAGESIZE := 2048
-	SOC := ipq6010
-	DEVICE_DTS_CONFIG := config@cp03-c1
-	DEVICE_PACKAGES := ipq-wifi-tplink_eap623od-hd-v1 kmod-phy-realtek
-	IMAGES += web-ui-factory.bin
-	IMAGE/web-ui-factory.bin := append-ubi | tplink-image-2022
-	TPLINK_SUPPORT_STRING := SupportList:\r\n \
-		EAP623-Outdoor HD(TP-Link|UN|AX1800-D):1.0
+define Device/tplink_eap623-outdoor-hd-v1
+	$(call Device/tplink_eap6xx-common)
+	DEVICE_MODEL := EAP623-Outdoor HD
+	DEVICE_VARIANT := v1
+	DEVICE_PACKAGES += ipq-wifi-tplink_eap623-outdoor-hd-v1
+	TPLINK_SUPPORT_STRING := SupportList:\r\nEAP623-Outdoor HD(TP-Link|UN|AX1800-D):1.0\r\n
 endef
-TARGET_DEVICES += tplink_eap623od-hd-v1
+TARGET_DEVICES += tplink_eap623-outdoor-hd-v1
 
-define Device/tplink_eap625od-hd-v1
-	$(call Device/FitImage)
-	$(call Device/UbiFit)
-	DEVICE_VENDOR := TP-Link
-	DEVICE_MODEL := EAP625-Outdoor HD v1 and v1.6
-	BLOCKSIZE := 128k
-	PAGESIZE := 2048
-	SOC := ipq6010
-	DEVICE_DTS_CONFIG := config@cp03-c1
-	DEVICE_PACKAGES := ipq-wifi-tplink_eap625od-hd-v1
-	IMAGES += web-ui-factory.bin
-	IMAGE/web-ui-factory.bin := append-ubi | tplink-image-2022
+define Device/tplink_eap625-outdoor-hd-v1
+	$(call Device/tplink_eap6xx-common)
+	DEVICE_MODEL := EAP625-Outdoor HD
+	DEVICE_VARIANT := v1
+	DEVICE_PACKAGES += ipq-wifi-tplink_eap625-outdoor-hd-v1
 	TPLINK_SUPPORT_STRING := SupportList:\r\n \
 		EAP625-Outdoor HD(TP-Link|UN|AX1800-D):1.0\r\n \
 		EAP625-Outdoor HD(TP-Link|CA|AX1800-D):1.0\r\n \
 		EAP625-Outdoor HD(TP-Link|AU|AX1800-D):1.0\r\n \
 		EAP625-Outdoor HD(TP-Link|KR|AX1800-D):1.0
 endef
-TARGET_DEVICES += tplink_eap625od-hd-v1
+TARGET_DEVICES += tplink_eap625-outdoor-hd-v1
 
 define Device/tplink_eap620-hd-v3
 	$(call Device/FitImage)
@@ -260,7 +278,6 @@ define Device/tplink_eap620-hd-v3
 		EAP620 HD(TP-Link|CA|AX1800-D):3.0\r\n \
 		EAP620 HD(TP-Link|JP|AX1800-D):3.0\r\n \
 		EAP620 HD(TP-Link|EG|AX1800-D):3.0\r\n
-
 endef
 TARGET_DEVICES += tplink_eap620-hd-v3
 
@@ -271,13 +288,41 @@ define Device/yuncore_fap650
 	DEVICE_MODEL := FAP650
 	BLOCKSIZE := 128k
 	PAGESIZE := 2048
-	SOC := ipq6000
 	DEVICE_DTS_CONFIG := config@cp03-c1
+	SOC := ipq6018
 	DEVICE_PACKAGES := ipq-wifi-yuncore_fap650
 	IMAGES := factory.ubi factory.ubin sysupgrade.bin
 	IMAGE/factory.ubin := append-ubi | qsdk-ipq-factory-nand
 endef
 TARGET_DEVICES += yuncore_fap650
+
+define Device/kt_ar06-012h
+	$(call Device/FitImage)
+	$(call Device/UbiFit)
+	DEVICE_VENDOR := KT
+	DEVICE_MODEL := AR06-012H
+	DEVICE_DTS := ipq6000-kt-ar06-012h
+	BLOCKSIZE := 128k
+	PAGESIZE := 2048
+	SOC := ipq6000
+	DEVICE_DTS_CONFIG := config@cp03-c1
+	DEVICE_PACKAGES := ipq-wifi-kt_ar06-012h
+endef
+TARGET_DEVICES += kt_ar06-012h
+
+define Device/lg_gapd-7500
+	$(call Device/FitImage)
+	$(call Device/UbiFit)
+	DEVICE_VENDOR := LG
+	DEVICE_MODEL := GAPD-7500
+  DEVICE_DTS := ipq6000-lg-gapd-7500
+	BLOCKSIZE := 128k
+	PAGESIZE := 2048
+	SOC := ipq6000
+	DEVICE_DTS_CONFIG := config@cp03-c1
+	DEVICE_PACKAGES := ipq-wifi-lg_gapd-7500 kmod-switch-rtl8367b
+endef
+TARGET_DEVICES += lg_gapd-7500
 
 define Device/anysafe_e1
 	$(call Device/FitImage)
@@ -356,25 +401,6 @@ define Device/redmi_ax5-jdcloud
 	IMAGE/factory.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-rootfs | pad-rootfs | pad-to 64k
 endef
 TARGET_DEVICES += redmi_ax5-jdcloud
-
-define Device/link_nn6000-v1
-	$(call Device/FitImage)
-	$(call Device/EmmcImage)
-	DEVICE_VENDOR := Link
-	DEVICE_MODEL := NN6000 v1
-	KERNEL_SIZE := 6144k
-	SOC := ipq6000
-	DEVICE_DTS_CONFIG := config@cp03-c1
-	DEVICE_PACKAGES := ipq-wifi-link_nn6000
-	IMAGE/factory.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-rootfs | append-metadata
-endef
-TARGET_DEVICES += link_nn6000-v1
-
-define Device/link_nn6000-v2
-	$(Device/link_nn6000-v1)
-	DEVICE_MODEL := NN6000 v2
-endef
-TARGET_DEVICES += link_nn6000-v2
 
 define Device/jdcloud_re-ss-01
 	$(call Device/FitImage)
