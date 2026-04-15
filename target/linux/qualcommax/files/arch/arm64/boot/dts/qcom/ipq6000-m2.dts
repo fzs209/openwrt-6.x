@@ -50,30 +50,8 @@
 	};
 };
 
-// ================== 彻底禁用 Wi-Fi 和 Q6 DSP ==================
-
-// 1. 禁用 Wi-Fi 设备 (标签存在，可用)
 &wifi {
-    status = "disabled";
-};
-
-// 2. 禁用 Q6 远程处理器 (标签通常存在，若报错可改用路径)
-&q6v5_wcss {
-    status = "disabled";
-};
-
-/ {
-    soc@0 {
-        remoteproc@cd00000 {
-            status = "disabled";
-        };
-    };
-};
-
-// 5. 通过绝对路径删除 Q6 ETR 和 M3 转储保留内存
-/ {
-    reserved-memory {
-        /delete-node/ q6_etr_dump@50b00000;
-        /delete-node/ m3_dump@50c00000;
-    };
+	status = "okay";
+	qcom,ath11k-fw-memory-mode = <1>;
+	qcom,ath11k-calibration-variant = "ZN-M2";
 };
