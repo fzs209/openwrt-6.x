@@ -1,0 +1,6 @@
+[submodule "package/luci-app-aurora-config"]
+	path = package/luci-app-aurora-config
+	url = https://github.com/eamonxg/luci-app-aurora-config.git
+[submodule "package/luci-theme-aurora"]
+	path = package/luci-theme-aurora
+	url = https://github.com/eamonxg/luci-theme-aurora.git
