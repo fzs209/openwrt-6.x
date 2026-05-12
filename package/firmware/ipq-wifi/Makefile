@@ -115,12 +115,10 @@ ALLWIFIBOARDS:= \
 	anysafe_e1 \
 	jdcloud_re-cs-03 \
 	link_nn6000 \
-	redmi_ax5 \
 	redmi_ax5-jdcloud \
 	verizon_cr1000a \
 	xiaomi_ax1800 \
-	cmiot_ax18 \
-	zn_m2
+	cmiot_ax18
 
 ALLWIFIPACKAGES:=$(foreach BOARD,$(ALLWIFIBOARDS),ipq-wifi-$(BOARD))
 
