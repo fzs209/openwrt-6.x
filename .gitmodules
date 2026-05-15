@@ -4,3 +4,6 @@
 [submodule "package/luci-theme-aurora"]
 	path = package/luci-theme-aurora
 	url = https://github.com/eamonxg/luci-theme-aurora.git
+[submodule "package/luci-app-lanspeed"]
+	path = package/luci-app-lanspeed
+	url = https://github.com/qimaoww/luci-app-lanspeed.git
