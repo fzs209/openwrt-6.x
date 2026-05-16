@@ -1,0 +1,23 @@
+#!/bin/sh
+
+# 1. 修改 LuCI 状态页面的刷新间隔从 3 秒改为 1 秒
+JS_DIR="/www/luci-static/resources/view/status"
+for js_file in load.js bandwidth.js connections.js; do
+    TARGET_FILE="$JS_DIR/$js_file"
+    if [ -f "$TARGET_FILE" ]; then
+        # 使用 [[:space:]]* 兼容可能存在的不同空格排版（如 const pollInterval=3; 或 const pollInterval = 3;）
+        sed -i 's/const pollInterval[[:space:]]*=[[:space:]]*3;/const pollInterval = 1;/g' "$TARGET_FILE"
+    fi
+done
+
+# 2. 修改 nlbwmon 启动脚本，在 start_service 内部开头注入重载命令
+NLBWMON_INIT="/etc/init.d/nlbwmon"
+if [ -f "$NLBWMON_INIT" ]; then
+    # 检查是否已经注入过，避免重复注入
+    if ! grep -q "rmmod nf_conntrack_netlink" "$NLBWMON_INIT"; then
+        # 使用 sed 精确匹配 start_service() { 并换行插入命令，完美兼容 BusyBox 环境
+        sed -i 's/start_service() {/start_service() {\n\trmmod nf_conntrack_netlink\n\tmodprobe nf_conntrack_netlink/' "$NLBWMON_INIT"
+    fi
+fi
+
+exit 0
